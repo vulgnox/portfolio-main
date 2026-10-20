@@ -1,0 +1,402 @@
+/* ============================================================
+   FX LAYER — background stack + glitch + scanlines
+   Layer order (bottom → top): nature photos (CC0, Wikimedia
+   Commons) → Faulty Terminal WebGL canvas → veil (scanlines,
+   vignette, tracking tear) → page content.
+   ============================================================ */
+
+.bg-stack {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--ink);
+  transition: transform 0.16s steps(2, end);
+}
+
+/* ---------- nature photography ---------- */
+.bg-photos {
+  position: absolute;
+  inset: -5%;
+}
+
+.bg-photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.2) brightness(0.5);
+  opacity: 0;
+  animation: photoCycle 36s linear infinite;
+  will-change: opacity;
+}
+
+/* image sources live here (relative to this file) so pages stay style-free.
+   Photos are pre-grayscale on disk (duotone base = red cast overlay), so the
+   live filter skips grayscale() — cheaper per frame on slow GPUs. */
+.bg-ridge {
+  background-image: url("img/ridge.webp");
+}
+.bg-forest {
+  background-image: url("img/forest.webp");
+}
+.bg-sky {
+  background-image: url("img/sky.webp");
+}
+
+@media (max-width: 760px) {
+  .bg-ridge {
+    background-image: url("img/ridge-sm.webp");
+  }
+  .bg-forest {
+    background-image: url("img/forest-sm.webp");
+  }
+  .bg-sky {
+    background-image: url("img/sky-sm.webp");
+  }
+}
+
+.bg-photo:nth-child(1) {
+  animation-delay: 0s;
+}
+.bg-photo:nth-child(2) {
+  animation-delay: -12s;
+}
+.bg-photo:nth-child(3) {
+  animation-delay: -24s;
+}
+
+@keyframes photoCycle {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.62;
+  }
+  33% {
+    opacity: 0.62;
+  }
+  39% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes photoCycleLight {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.3;
+  }
+  33% {
+    opacity: 0.3;
+  }
+  39% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* red cast + grounding gradient over the photos */
+.bg-photos::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(158, 27, 34, 0.17),
+      rgba(11, 11, 11, 0) 45%,
+      rgba(158, 27, 34, 0.13)
+    ),
+    linear-gradient(0deg, rgba(11, 11, 11, 0.55), rgba(11, 11, 11, 0.22));
+}
+
+/* ---------- Faulty Terminal canvas ---------- */
+.ft-wrap {
+  position: absolute;
+  inset: 0;
+  /* low on purpose: the dot field must never fight small text — in dark
+     mode the white glyphs were still winning against 10px body copy */
+  opacity: 0.2;
+}
+
+.ft-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- veil: scanlines + vignette + tear band ---------- */
+.bg-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(11, 11, 11, 0.32) 0 1px,
+      rgba(11, 11, 11, 0) 1px 3px
+    ),
+    radial-gradient(
+      120% 90% at 50% 38%,
+      rgba(11, 11, 11, 0) 0%,
+      rgba(11, 11, 11, 0.34) 55%,
+      rgba(11, 11, 11, 0.84) 100%
+    );
+}
+
+.bg-veil::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  height: 7%;
+  top: 34%;
+  background: rgba(201, 196, 184, 0.07);
+  box-shadow: 0 0 0 1px rgba(226, 58, 46, 0.25);
+  opacity: 0;
+}
+
+/* ---------- glitch: horizontal tracking tear ---------- */
+.bg-stack.glitch-on {
+  transform: translateX(7px);
+}
+.bg-stack.glitch-on .bg-veil::after {
+  animation: fxTear 0.28s steps(4, end) 1;
+}
+
+@keyframes fxTear {
+  0% {
+    opacity: 0.9;
+    top: 12%;
+  }
+  25% {
+    top: 47%;
+  }
+  50% {
+    opacity: 0.7;
+    top: 63%;
+  }
+  75% {
+    top: 28%;
+  }
+  100% {
+    opacity: 0;
+    top: 80%;
+  }
+}
+
+/* ---------- glitch: headline RGB split + slice ---------- */
+.hero-statement.glitch-on,
+.cs-title.glitch-on {
+  animation: fxGlitch 0.32s steps(2, end) 1;
+  text-shadow:
+    0.035em 0 var(--red-bright),
+    -0.035em 0 rgba(201, 196, 184, 0.55);
+}
+
+@keyframes fxGlitch {
+  0% {
+    transform: translate(0);
+    clip-path: inset(0 0 0 0);
+  }
+  20% {
+    transform: translate(-4px, 1px) skewX(-3deg);
+    clip-path: inset(15% 0 55% 0);
+  }
+  40% {
+    transform: translate(5px, -2px);
+    clip-path: inset(48% 0 22% 0);
+  }
+  60% {
+    transform: translate(-6px, 0);
+    clip-path: inset(70% 0 8% 0);
+  }
+  80% {
+    transform: translate(3px, 1px);
+    clip-path: inset(30% 0 40% 0);
+  }
+  100% {
+    transform: none;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* ---------- glitch: logo micro-shudder ---------- */
+.logo.glitch-on {
+  animation: fxLogoGlitch 0.24s steps(2, end) 1;
+}
+
+@keyframes fxLogoGlitch {
+  0%,
+  100% {
+    transform: none;
+    text-shadow: none;
+  }
+  30% {
+    transform: translateX(-2px) skewX(-8deg);
+    text-shadow: 2px 0 var(--red-bright);
+  }
+  60% {
+    transform: translateX(3px);
+    text-shadow: -3px 0 rgba(226, 58, 46, 0.8);
+  }
+}
+
+/* ---------- light theme: lift the veil, invert the treatment ---------- */
+html[data-theme="light"] .bg-photo {
+  filter: contrast(0.95) brightness(1.5);
+  animation-name: photoCycleLight;
+}
+html[data-theme="light"] .bg-photos::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(158, 27, 34, 0.1),
+      rgba(201, 196, 184, 0) 45%,
+      rgba(158, 27, 34, 0.08)
+    ),
+    linear-gradient(0deg, rgba(201, 196, 184, 0.45), rgba(201, 196, 184, 0.15));
+}
+html[data-theme="light"] .bg-veil {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(201, 196, 184, 0.35) 0 1px,
+      rgba(201, 196, 184, 0) 1px 3px
+    ),
+    radial-gradient(
+      120% 90% at 50% 38%,
+      rgba(201, 196, 184, 0) 0%,
+      rgba(201, 196, 184, 0.42) 55%,
+      rgba(201, 196, 184, 0.86) 100%
+    );
+}
+html[data-theme="light"] .ft-wrap {
+  opacity: 0.4;
+}
+html[data-theme="light"] .bg-veil::after {
+  background: rgba(11, 11, 11, 0.06);
+}
+
+/* ---------- reduced motion: static frame, no tears ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .bg-photo {
+    animation: none;
+    transform: none;
+  }
+  .bg-photo:nth-child(1) {
+    opacity: 0.5;
+  }
+  .bg-photo:nth-child(2),
+  .bg-photo:nth-child(3) {
+    opacity: 0;
+  }
+  .hero-statement.glitch-on,
+  .cs-title.glitch-on,
+  .logo.glitch-on {
+    animation: none;
+  }
+  .bg-stack.glitch-on {
+    animation: none;
+    transform: none;
+  }
+  .decor .decor-inner,
+  .decor img {
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   DECORATIVE NATURE IMAGES — portrait panels woven into the work
+   list. Same treatment as the background stack: pre-grayscale
+   files, so the theme overlay doubles them into the site duotone;
+   grain + scanlines fall over them from the global layers.
+   ============================================================ */
+.decor {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.decor-inner {
+  position: absolute;
+  inset: 0;
+}
+.decor img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: contrast(1.12) brightness(0.5);
+  transition: transform 0.9s cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+/* reveal: the frame wipes the photo into view by translating it */
+.decor img {
+  transform: translateY(-12%);
+}
+.decor.in img {
+  transform: translateY(0);
+}
+.decor:hover img,
+.decor:focus-within img,
+.row:hover .decor img {
+  transform: translateY(0) scale(1.04);
+}
+/* theme duotone cast + grounding gradient */
+.decor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(158, 27, 34, 0.2),
+      rgba(11, 11, 11, 0.1) 55%,
+      rgba(11, 11, 11, 0.55)
+    ),
+    linear-gradient(0deg, rgba(11, 11, 11, 0.35), rgba(11, 11, 11, 0.12));
+}
+/* caption chip over the photo */
+.decor-cap {
+  position: absolute;
+  left: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 2;
+  font-family: var(--mono, monospace);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #f4efe4;
+  background: rgba(11, 11, 11, 0.55);
+  padding: 0.28rem 0.5rem;
+  border: 1px solid rgba(201, 196, 184, 0.25);
+}
+html[data-theme="light"] .decor img {
+  filter: contrast(0.95) brightness(1.5);
+}
+html[data-theme="light"] .decor::after {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(158, 27, 34, 0.09),
+      rgba(201, 196, 184, 0.08) 55%,
+      rgba(201, 196, 184, 0.4)
+    ),
+    linear-gradient(0deg, rgba(201, 196, 184, 0.35), rgba(201, 196, 184, 0.1));
+}
+html[data-theme="light"] .decor-cap {
+  color: #16130f;
+  background: rgba(201, 196, 184, 0.6);
+  border-color: rgba(11, 11, 11, 0.25);
+}

@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="eva-shell: a full i3wm desktop environment built around NERV's MAGI — three HUD panels, live telemetry from /proc, and a local LLM standing in for MELCHIOR."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="eva-shell — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="eva-shell: a full i3wm desktop environment built around NERV's MAGI — three HUD panels, live telemetry from /proc, and a local LLM standing in for MELCHIOR."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/eva-shell.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="eva-shell — Case Study — NOX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="eva-shell — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="eva-shell: a full i3wm desktop environment built around NERV's MAGI — three HUD panels, live telemetry from /proc, and a local LLM standing in for MELCHIOR."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/eva-shell.html"
+    />
+    <title>eva-shell — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "eva-shell — Case Study",
+        "headline": "eva-shell",
+        "url": "https://portfolio-nox07.vercel.app/work/eva-shell.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="2">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>02</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">02</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 02 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              EVA<br /><span class="ghost">SHELL</span>
+            </h1>
+            <div class="cs-tags">
+              <span>i3-gaps</span><span>eww</span><span>Ollama</span
+              ><span>Shell</span><span class="hot">Linux / Desktop</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              A working i3 environment built around NERV's MAGI supercomputer.
+              <em
+                >Three panels stand in for MELCHIOR, BALTHASAR and CASPAR — one
+                runs a local LLM for live system analysis. A daily driver, not a
+                wallpaper.</em
+              >
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Desktop environment</b></li>
+              <li><span>Status</span><b class="on">Daily driver</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Host</span><b>Ubuntu 24.04</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://github.com/vulgnox/eva-shell"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <rect
+                    x="12"
+                    y="14"
+                    width="40"
+                    height="54"
+                    stroke-opacity="0.8"
+                  />
+                  <rect
+                    x="60"
+                    y="14"
+                    width="40"
+                    height="54"
+                    stroke-opacity="0.8"
+                  />
+                  <rect
+                    x="108"
+                    y="14"
+                    width="40"
+                    height="54"
+                    stroke-opacity="0.8"
+                  />
+                  <path d="M18 22h28M66 22h28M114 22h28" stroke-opacity="0.5" />
+                  <path d="M8 76h144" stroke-opacity="0.35" />
+                  <path
+                    d="M22 76v-6M32 76v-10M42 76v-4M70 76v-8M80 76v-12M90 76v-5M118 76v-7M128 76v-3M138 76v-9"
+                    stroke-opacity="0.6"
+                  />
+                </g>
+                <g class="pv-a">
+                  <rect x="18" y="30" width="4" height="26">
+                    <animate
+                      attributeName="height"
+                      values="26;10;26"
+                      dur="2.6s"
+                      repeatCount="indefinite"
+                    />
+                    <animate
+                      attributeName="y"
+                      values="30;46;30"
+                      dur="2.6s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                  <rect x="26" y="34" width="4" height="22">
+                    <animate
+                      attributeName="height"
+                      values="22;30;22"
+                      dur="2.1s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                </g>
+                <g class="pv-a" opacity="0.85">
+                  <rect x="66" y="36" width="4" height="20">
+                    <animate
+                      attributeName="height"
+                      values="20;32;20"
+                      dur="3s"
+                      repeatCount="indefinite"
+                    />
+                    <animate
+                      attributeName="y"
+                      values="36;24;36"
+                      dur="3s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                  <rect x="74" y="30" width="4" height="26">
+                    <animate
+                      attributeName="height"
+                      values="26;16;26"
+                      dur="1.9s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                </g>
+                <g fill="currentColor" opacity="0.7">
+                  <rect x="114" y="32" width="4" height="24">
+                    <animate
+                      attributeName="opacity"
+                      values="1;0.25;1"
+                      dur="2.4s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                  <rect x="122" y="30" width="4" height="26">
+                    <animate
+                      attributeName="opacity"
+                      values="0.3;1;0.3"
+                      dur="2.4s"
+                      repeatCount="indefinite"
+                    />
+                  </rect>
+                </g>
+                <circle cx="146" cy="18" r="2.4" class="pv-a pv-pulse" />
+              </svg>
+              <figcaption>
+                FIG. 02 — MAGI: THREE UNITS, LIVE TELEMETRY
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              eva-shell is a complete desktop replacement, not a rice. A
+              three-column HUD — 280px flanks around a dynamic center — a 96px
+              four-cell bottom panel, and a 16px NERV top bar carrying a live
+              timestamp.
+            </p>
+            <h3>MAGI, rendered</h3>
+            <p>
+              Three hexagon units — <b>MELCHIOR, BALTHASAR, CASPAR</b> — carry
+              live system metrics as progress bars and consensus indicators.
+              Logs, process trees and network intercept (RX/TX) stream from
+              <b>/proc, /sys and journalctl</b> through ten-plus bash helpers.
+            </p>
+            <h3>Melchior speaks</h3>
+            <p>
+              The workspace switcher doubles as an analysis console: Ollama runs
+              <b>llama3.2:1b</b> locally and answers with tactical system
+              assessments.
+              <em
+                >No cloud, no telemetry — the machine interrogating itself.</em
+              >
+            </p>
+            <h3>One file, one mood</h3>
+            <p>
+              <b>themes/eva-01/colors.conf</b> controls the entire visual
+              identity. GTK3-compatible SCSS, flat CSS, exact color match to the
+              HTML reference — and the full stack settles at ~250MB on an i5.
+            </p>
+            <blockquote class="cs-quote">
+              The interaction between complementary opposites generates all
+              phenomena.<cite
+                >MAGI consensus — Melchior / Balthasar / Caspar</cite
+              >
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Status</dt>
+                <dd><b class="on">Daily driver</b></dd>
+              </div>
+              <div>
+                <dt>Layout</dt>
+                <dd><b>3 columns + bottom panel</b></dd>
+              </div>
+              <div>
+                <dt>Widgets</dt>
+                <dd><b>eww (built from source)</b></dd>
+              </div>
+              <div>
+                <dt>LLM</dt>
+                <dd><b>Ollama llama3.2:1b</b></dd>
+              </div>
+              <div>
+                <dt>Load</dt>
+                <dd><b>~250MB full stack</b></dd>
+              </div>
+              <div>
+                <dt>Host</dt>
+                <dd><b>Ubuntu 24.04 · i5</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Install</h3>
+                <p>
+                  install.sh takes the apt dependencies, builds eww from source
+                  and symlinks ~/.config/eva-shell from the repo.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Compose</h3>
+                <p>
+                  i3-gaps + picom: sharp windows, desaturated blur and shadow, a
+                  custom animation curve.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Stream</h3>
+                <p>
+                  Ten-plus bash helpers pull from /proc, /sys and journalctl
+                  into the panels — logs, process tree, network bars.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Consult</h3>
+                <p>
+                  MELCHIOR's box runs llama3.2:1b through Ollama for local
+                  system analysis on demand.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Re-skin</h3>
+                <p>
+                  One colors.conf re-themes the whole desktop; GTK3-compatible
+                  SCSS keeps it flat and fast.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">Phase 1–3 — layout</span>
+              <p>
+                Three-column HUD, MAGI progress bars, bottom four-cell panel.
+                Palette locked to the HTML reference, byte for byte.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Phase 4 — top bar</span>
+              <p>
+                eww header: NERV branding, live timestamp, orange border, three
+                sections — working now.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">In progress</span>
+              <p>
+                MAGI ring SVG in the center canvas, workspace indicator on i3
+                events, MELCHIOR prompt tuning — phases 5 through 10 tracked in
+                the phase plan.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="psyche-analyze.html">
+            <span class="cs-nav-idx">← PREVIOUS — 01</span>
+            <span class="cs-nav-name">Psyche_analyze</span>
+          </a>
+          <a href="eva-bots.html">
+            <span class="cs-nav-idx">NEXT — 03 →</span>
+            <span class="cs-nav-name">Evangelion Bots</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>

@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Blood &amp; Coin: an AI-powered Discord RPG economy — Llama 3.3 70B narrates duels and daily decrees over a persistent city of Valdris."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Blood &amp; Coin — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="Blood &amp; Coin: an AI-powered Discord RPG economy — Llama 3.3 70B narrates duels and daily decrees over a persistent city of Valdris."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/blood-and-coin.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Blood &amp; Coin — Case Study — NOX"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Blood &amp; Coin — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="Blood &amp; Coin: an AI-powered Discord RPG economy — Llama 3.3 70B narrates duels and daily decrees over a persistent city of Valdris."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/blood-and-coin.html"
+    />
+    <title>Blood &amp; Coin — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "Blood & Coin — Case Study",
+        "headline": "Blood & Coin",
+        "url": "https://portfolio-nox07.vercel.app/work/blood-and-coin.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="6">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>06</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">06</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 06 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              BLOOD &amp;<br /><span class="ghost">COIN</span>
+            </h1>
+            <div class="cs-tags">
+              <span>Python</span><span>OpenRouter</span
+              ><span>Llama 3.3 70B</span><span>Discord</span
+              ><span class="hot">Game / Systems</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              Duels, bounties, faction war and a full economy inside the city of
+              Valdris.
+              <em
+                >A persistent world nobody sane would maintain by hand — so a
+                70B model maintains it.</em
+              >
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Fantasy economy</b></li>
+              <li><span>Status</span><b class="on">Shipped</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Year</span><b>2026</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://github.com/vulgnox/discord-bot-blood-and-coin-"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <circle cx="48" cy="45" r="21" stroke-opacity="0.8" />
+                  <circle
+                    cx="48"
+                    cy="45"
+                    r="14"
+                    stroke-opacity="0.4"
+                    stroke-dasharray="2 4"
+                  />
+                  <path
+                    d="M44 41h8M44 50h8M48 37v4M48 50v4"
+                    stroke-opacity="0.5"
+                  />
+                  <path d="M108 22l20 23-20 23-20-23z" stroke-opacity="0.85" />
+                  <path d="M108 34l10 11-10 12-10-12z" stroke-opacity="0.45" />
+                  <path d="M102 44h12" stroke-opacity="0.6" />
+                  <path d="M72 45h14m-4-4 4 4-4 4" stroke-opacity="0.55" />
+                </g>
+                <circle cx="48" cy="45" r="3" class="pv-a" />
+                <circle r="2.2" class="pv-a pv-pulse">
+                  <animateMotion
+                    dur="2.6s"
+                    repeatCount="indefinite"
+                    path="M90 45 Q100 70 108 63"
+                  />
+                </circle>
+                <circle cx="108" cy="45" r="2" class="pv-a pv-pulse" />
+              </svg>
+              <figcaption>
+                FIG. 06 — DUEL PROTOCOL: CHALLENGE, NARRATE, PAY
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              Blood &amp; Coin runs a living fantasy RP economy inside a Discord
+              server —
+              <b>Coin and Blood</b> as currencies, factions at war, and a city
+              of Valdris that issues edicts whether or not anyone is watching.
+            </p>
+            <h3>The daily decree</h3>
+            <p>
+              Every morning at <b>9 AM IST</b> an AI-generated event posts to
+              #daily-decree. React with /decree respond, earn 50 Coin. The
+              leaderboard in #leaderboard updates live after every action.
+            </p>
+            <h3>AI-narrated violence</h3>
+            <p>
+              /duel @user — a <b>Llama 3.3 70B</b> model narrates the fight, the
+              winner takes 50 Coin. /legend turns a player's submitted moment
+              into Hall of Legends lore.
+              <em
+                >The model isn't a chatbot here; it's the dungeon master writing
+                the server's history.</em
+              >
+            </p>
+            <h3>Economy guardrails</h3>
+            <p>
+              /give moves Coin between players; admin-only /forcepost and
+              /addcoin work the levers. Three channels — daily-decree,
+              leaderboard, hall-of-legends — and a Railway deployment with every
+              token in environment variables.
+            </p>
+            <blockquote class="cs-quote">
+              A persistent world nobody sane would maintain by hand.<cite
+                >The city of Valdris</cite
+              >
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Model</dt>
+                <dd><b class="on">Llama 3.3 70B</b></dd>
+              </div>
+              <div>
+                <dt>Via</dt>
+                <dd><b>OpenRouter</b></dd>
+              </div>
+              <div>
+                <dt>Rhythm</dt>
+                <dd><b>decree 9 AM IST</b></dd>
+              </div>
+              <div>
+                <dt>Currencies</dt>
+                <dd><b>Coin + Blood</b></dd>
+              </div>
+              <div>
+                <dt>Lore</dt>
+                <dd><b>/legend → Hall of Legends</b></dd>
+              </div>
+              <div>
+                <dt>Deploy</dt>
+                <dd><b>Railway (free)</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Create</h3>
+                <p>
+                  Discord application with Server Members and Message Content
+                  intents; invite with embed permissions.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Channel</h3>
+                <p>
+                  daily-decree, leaderboard, hall-of-legends — names must match,
+                  or override them in env.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Deploy</h3>
+                <p>
+                  Railway: deploy from GitHub, pour tokens into variables, set
+                  the start command.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Loop</h3>
+                <p>
+                  9 AM IST decree → /decree respond pays 50 → duels narrate →
+                  legends write lore → leaderboard updates live.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Govern</h3>
+                <p>
+                  Admin commands /forcepost and /addcoin steer the economy
+                  without touching code.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">OpenRouter wiring</span>
+              <p>
+                Llama 3.3 70B through OpenRouter — one key, one model, narrating
+                every decree and duel.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Live leaderboard</span>
+              <p>
+                #leaderboard reposts after every action — the economy is visible
+                or it isn't real.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Deployment</span>
+              <p>
+                Railway free tier, environment variables only — no token ever
+                touches the repo.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="outgrow.html">
+            <span class="cs-nav-idx">← PREVIOUS — 05</span>
+            <span class="cs-nav-name">Outgrow</span>
+          </a>
+          <a href="personal-tracker.html">
+            <span class="cs-nav-idx">NEXT — 07 →</span>
+            <span class="cs-nav-name">personal-tracker</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>

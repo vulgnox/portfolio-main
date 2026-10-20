@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="NOX: a local desktop AI agent — Mistral 7B via Ollama, SQLite memory that survives restarts, a pattern-match fast path and voice input."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="local-agent — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="NOX: a local desktop AI agent — Mistral 7B via Ollama, SQLite memory that survives restarts, a pattern-match fast path and voice input."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/local-agent.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="local-agent — Case Study — NOX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="local-agent — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="NOX: a local desktop AI agent — Mistral 7B via Ollama, SQLite memory that survives restarts, a pattern-match fast path and voice input."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/local-agent.html"
+    />
+    <title>local-agent — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "local-agent — Case Study",
+        "headline": "local-agent",
+        "url": "https://portfolio-nox07.vercel.app/work/local-agent.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="4">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>04</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">04</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 04 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              LOCAL<br /><span class="ghost">AGENT</span>
+            </h1>
+            <div class="cs-tags">
+              <span>Python</span><span>Ollama</span><span>SQLite</span
+              ><span>Voice</span><span class="hot">AI / Local</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              A desktop AI agent that runs entirely on the machine and remembers
+              across sessions.
+              <em>Local architecture, no cloud dependency, no forgetting.</em>
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Desktop agent</b></li>
+              <li><span>Status</span><b class="on">Local-only</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Year</span><b>2026</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://github.com/vulgnox/local-agent"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <circle
+                    cx="80"
+                    cy="45"
+                    r="30"
+                    stroke-opacity="0.35"
+                    stroke-dasharray="2 5"
+                  />
+                  <circle cx="80" cy="45" r="12" stroke-opacity="0.65" />
+                  <circle cx="80" cy="45" r="5" stroke-opacity="0.9" />
+                  <path
+                    d="M80 45v-8M80 12v10M80 68v10M47 45h10M103 45h10"
+                    stroke-opacity="0.5"
+                  />
+                  <rect
+                    x="20"
+                    y="20"
+                    width="20"
+                    height="14"
+                    stroke-opacity="0.7"
+                  />
+                  <rect
+                    x="120"
+                    y="56"
+                    width="20"
+                    height="14"
+                    stroke-opacity="0.7"
+                  />
+                  <rect
+                    x="118"
+                    y="18"
+                    width="22"
+                    height="14"
+                    stroke-opacity="0.55"
+                  />
+                  <rect
+                    x="22"
+                    y="56"
+                    width="18"
+                    height="14"
+                    stroke-opacity="0.55"
+                  />
+                  <path d="M30 34v-6m0 0 8 3m-8-3-8 3" stroke-opacity="0.4" />
+                </g>
+                <g fill="currentColor" opacity="0.6">
+                  <rect x="24" y="23" width="4" height="3" />
+                  <rect x="30" y="23" width="4" height="3" />
+                  <rect x="36" y="23" width="2" height="3" />
+                  <rect x="124" y="59" width="4" height="3" />
+                  <rect x="130" y="59" width="6" height="3" />
+                </g>
+                <circle r="2" class="pv-a">
+                  <animateMotion
+                    dur="9s"
+                    repeatCount="indefinite"
+                    path="M110 45 A30 30 0 1 1 109 41 A30 30 0 1 1 110 45"
+                  />
+                </circle>
+                <circle r="2" class="pv-a" opacity="0.8">
+                  <animateMotion
+                    dur="9s"
+                    begin="-4.5s"
+                    repeatCount="indefinite"
+                    path="M110 45 A30 30 0 1 1 109 41 A30 30 0 1 1 110 45"
+                  />
+                </circle>
+                <circle cx="80" cy="45" r="3" class="pv-a pv-pulse" />
+              </svg>
+              <figcaption>
+                FIG. 04 — PATTERN MATCH → EXECUTE / ASK MISTRAL → VALIDATE
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              NOX is a free local agent for desktop automation.
+              <b>Mistral 7B</b> runs through Ollama on localhost:11434 — no
+              cloud, no API costs, all on-device, inside a Python event loop you
+              can read in one sitting.
+            </p>
+            <h3>Fast path first</h3>
+            <p>
+              Pattern matching answers instantly: <b>list files</b> becomes ls
+              -la, <b>check disk space</b> becomes df -h, plus memory usage,
+              system info, processes — without waking the model at all. Only
+              what the patterns miss goes to Mistral, and what comes back is
+              <b>validated strictly</b> before anything executes. Dangerous
+              commands never auto-run.
+            </p>
+            <h3>It remembers</h3>
+            <p>
+              “Remember that I like Python” writes to a SQLite database; every
+              later answer is built with those facts as context —
+              <em>“based on the fact that you prefer Python…”</em>. forget, list
+              memories, clear memories — all first-class commands.
+            </p>
+            <h3>And it listens</h3>
+            <p>
+              Speech-to-text with wake-word detection — any phrase containing
+              <b>“nox”</b> arms voice mode. No voice output: pyttsx3 wasn't good
+              enough to ship.
+            </p>
+            <blockquote class="cs-quote">
+              Pattern match? Execute instantly. Otherwise ask Mistral — and
+              validate strictly before running anything.<cite
+                >The architecture</cite
+              >
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Brain</dt>
+                <dd><b class="on">Mistral 7B · Ollama</b></dd>
+              </div>
+              <div>
+                <dt>Memory</dt>
+                <dd><b>SQLite memories.db</b></dd>
+              </div>
+              <div>
+                <dt>Fast path</dt>
+                <dd><b>pattern commands</b></dd>
+              </div>
+              <div>
+                <dt>Voice</dt>
+                <dd><b>wake word: nox</b></dd>
+              </div>
+              <div>
+                <dt>Safety</dt>
+                <dd><b>no dangerous auto-exec</b></dd>
+              </div>
+              <div>
+                <dt>Deps</dt>
+                <dd><b>requests · SpeechRecognition</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Listen</h3>
+                <p>
+                  Text or voice; wake-word detection arms a voice session on any
+                  phrase containing nox.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Match</h3>
+                <p>
+                  command_patterns.py recognises system and file operations and
+                  executes them instantly — no model involved.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Consult</h3>
+                <p>
+                  Only unmatched input reaches Mistral through Ollama, with
+                  saved memories injected as context.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Validate</h3>
+                <p>
+                  executor.py runs model-suggested commands through a safety
+                  gate — nothing dangerous executes on its own.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Remember</h3>
+                <p>
+                  Anything prefaced “remember that” lands in SQLite and shapes
+                  every future answer.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">Core loop</span>
+              <p>
+                agent.py + main.py: pattern fast path, Mistral fallback, memory
+                context injected before every response.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Memory system</span>
+              <p>
+                SQLite remembers explicit facts — remember that / forget / list
+                / clear — and recalls them into context.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Voice</span>
+              <p>
+                Wake-word detection on “nox”, speech-to-text input. No voice
+                output — the quality wasn't there.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="eva-bots.html">
+            <span class="cs-nav-idx">← PREVIOUS — 03</span>
+            <span class="cs-nav-name">Evangelion Bots</span>
+          </a>
+          <a href="outgrow.html">
+            <span class="cs-nav-idx">NEXT — 05 →</span>
+            <span class="cs-nav-name">Outgrow</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>

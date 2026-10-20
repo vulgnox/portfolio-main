@@ -1,0 +1,20 @@
+{
+  "name": "nox-portfolio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "html-validate index.html work/*.html",
+    "format": "prettier --write index.html \"work/*.html\" work/case.css work/case.js fx.css fx.js faulty-terminal.js",
+    "format:check": "prettier --check index.html \"work/*.html\" work/case.css work/case.js fx.css fx.js faulty-terminal.js",
+    "cases": "node scripts/build-cases.mjs && prettier --write \"work/*.html\"",
+    "verify": "node scripts/verify.mjs",
+    "lhci": "lhci autorun"
+  },
+  "devDependencies": {
+    "@lhci/cli": "^0.14.0",
+    "axe-core": "^4.10.2",
+    "html-validate": "^9.7.0",
+    "playwright-core": "^1.49.0",
+    "prettier": "^3.4.0"
+  }
+}

@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Outgrow: a multiplayer discipline engine for exam season — Python stdlib, SQLite, invite-only crews, chat, XP and a Discord webhook."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Outgrow — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="Outgrow: a multiplayer discipline engine for exam season — Python stdlib, SQLite, invite-only crews, chat, XP and a Discord webhook."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/outgrow.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Outgrow — Case Study — NOX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Outgrow — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="Outgrow: a multiplayer discipline engine for exam season — Python stdlib, SQLite, invite-only crews, chat, XP and a Discord webhook."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/outgrow.html"
+    />
+    <title>Outgrow — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "Outgrow — Case Study",
+        "headline": "Outgrow",
+        "url": "https://portfolio-nox07.vercel.app/work/outgrow.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="5">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>05</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">05</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 05 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              OUT<br /><span class="ghost">GROW</span>
+            </h1>
+            <div class="cs-tags">
+              <span>Python stdlib</span><span>SQLite</span
+              ><span>Mobile-first web</span><span>~80 API checks</span
+              ><span class="hot">Data / Systems</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              Growth tracking turned into something measurable — and then
+              multiplayer.
+              <em
+                >A discipline engine for exam season: crews, streaks, XP, and a
+                day that rolls over at 3 AM.</em
+              >
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Discipline engine</b></li>
+              <li><span>Status</span><b class="on">Self-hosted</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Year</span><b>2026</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://github.com/vulgnox/Outgrow"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <path
+                    d="M14 18h132M14 34h132M14 50h132"
+                    stroke-opacity="0.12"
+                  />
+                  <path d="M14 72h132" stroke-opacity="0.4" />
+                  <path d="M20 68l60-4M90 62l50-9" stroke-opacity="0.2" />
+                </g>
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <rect
+                    x="22"
+                    y="56"
+                    width="9"
+                    height="16"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="40"
+                    y="49"
+                    width="9"
+                    height="23"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="58"
+                    y="41"
+                    width="9"
+                    height="31"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="76"
+                    y="34"
+                    width="9"
+                    height="38"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="94"
+                    y="26"
+                    width="9"
+                    height="46"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="112"
+                    y="20"
+                    width="9"
+                    height="52"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="130"
+                    y="13"
+                    width="9"
+                    height="59"
+                    stroke-opacity="0.7"
+                  />
+                </g>
+                <path
+                  d="M26 58l18-7 18-8 18-7 18-8 18-6 18-7"
+                  class="pv-ring"
+                  stroke-opacity="0.9"
+                />
+                <g class="pv-a">
+                  <circle cx="26" cy="58" r="1.8" />
+                  <circle cx="44" cy="51" r="1.8" />
+                  <circle cx="62" cy="43" r="1.8" />
+                  <circle cx="80" cy="36" r="1.8" />
+                  <circle cx="98" cy="28" r="1.8" />
+                  <circle cx="134" cy="11" r="1.8" />
+                </g>
+                <circle r="2.4" class="pv-a pv-pulse">
+                  <animateMotion
+                    dur="3.2s"
+                    repeatCount="indefinite"
+                    path="M26 58l18-7 18-8 18-7 18-8 18-6 18-7"
+                  />
+                </circle>
+              </svg>
+              <figcaption>FIG. 05 — STREAK CURVE: SEASON 0 → NOW</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              Outgrow is what growth_tracker grew into: a
+              <b>multiplayer discipline engine</b> for exam season. Python
+              standard library only, SQLite on disk, mobile-first web UI —
+              ./run.sh and it's on localhost:8765 with the LAN address printed.
+            </p>
+            <h3>Crews, not accounts</h3>
+            <p>
+              First boot creates the crew <b>NervHQ</b> and prints an invite
+              code. Friends open the ./share.sh public HTTPS link, enter the
+              code, add the app to their home screen. Crew room chat plus
+              private DMs — text only, 1000 chars, because files are a rabbit
+              hole.
+            </p>
+            <h3>A day that ends at 3 AM</h3>
+            <p>
+              The day rolls over at <b>3 AM in the server's timezone</b> — late
+              sessions still count. Badges, level-ups, streaks and comebacks
+              echo to Discord through an optional webhook. Admins get a
+              dashboard: stats, DB backup download, PIN reset.
+            </p>
+            <h3>Season 0</h3>
+            <p>
+              The original growth_tracker CSV imports as <b>Season 0</b> — old
+              usernames keep their history and gain a veteran badge. Around
+              <em>~80 API checks</em> run against a temp database on their own
+              port before anything ships. Data lives in one file: copy
+              outgrow.db to back up.
+            </p>
+            <blockquote class="cs-quote">
+              Anyone who registers with their old username gets XP and a veteran
+              badge.<cite>Season 0 continuity</cite>
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Stack</dt>
+                <dd><b class="on">Python stdlib</b></dd>
+              </div>
+              <div>
+                <dt>Data</dt>
+                <dd><b>SQLite outgrow.db</b></dd>
+              </div>
+              <div>
+                <dt>UI</dt>
+                <dd><b>mobile-first</b></dd>
+              </div>
+              <div>
+                <dt>Tests</dt>
+                <dd><b>~80 API checks</b></dd>
+              </div>
+              <div>
+                <dt>Day rolls</dt>
+                <dd><b>3 AM local</b></dd>
+              </div>
+              <div>
+                <dt>Deploy</dt>
+                <dd><b>run.sh · share.sh · VPS</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Run</h3>
+                <p>
+                  ./run.sh starts the server and prints the LAN address; first
+                  boot creates the crew and its invite code.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Invite</h3>
+                <p>
+                  ./share.sh prints a public HTTPS link for friends off your
+                  Wi-Fi — add to home screen, install as an app.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Compete</h3>
+                <p>
+                  Log sessions, keep streaks, climb XP — badges and level-ups
+                  post to Discord via webhook.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Administer</h3>
+                <p>
+                  OUTGROW_ADMINS grants a dashboard: server stats, database
+                  backup download, PIN reset.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Verify</h3>
+                <p>
+                  python3 test_api.py runs ~80 checks against a temporary
+                  database on its own port.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">Season 0</span>
+              <p>
+                growth_tracker's CSV imported as Season 0 — veterans keep their
+                names, gain XP and a badge.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Multiplayer</span>
+              <p>
+                Crews, invites, chat room and DMs — stdlib HTTP, one SQLite
+                file, zero framework.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Share link</span>
+              <p>
+                ./share.sh opens the crew to friends off the LAN; DEPLOY.md
+                covers 24/7 on a VPS.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="local-agent.html">
+            <span class="cs-nav-idx">← PREVIOUS — 04</span>
+            <span class="cs-nav-name">local-agent</span>
+          </a>
+          <a href="blood-and-coin.html">
+            <span class="cs-nav-idx">NEXT — 06 →</span>
+            <span class="cs-nav-name">Blood &amp; Coin</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>

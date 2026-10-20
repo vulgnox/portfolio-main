@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="JEE Mains Journey Tracker: subject-wise study log, streaks, 45/10 pomodoro and focus mode — vanilla JS, offline, localStorage only."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="personal-tracker — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="JEE Mains Journey Tracker: subject-wise study log, streaks, 45/10 pomodoro and focus mode — vanilla JS, offline, localStorage only."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/personal-tracker.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="personal-tracker — Case Study — NOX"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="personal-tracker — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="JEE Mains Journey Tracker: subject-wise study log, streaks, 45/10 pomodoro and focus mode — vanilla JS, offline, localStorage only."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/personal-tracker.html"
+    />
+    <title>personal-tracker — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "personal-tracker — Case Study",
+        "headline": "personal-tracker",
+        "url": "https://portfolio-nox07.vercel.app/work/personal-tracker.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="7">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>07</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">07</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 07 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              PERSONAL<br /><span class="ghost">TRACKER</span>
+            </h1>
+            <div class="cs-tags">
+              <span>Vanilla JS</span><span>Chart.js</span><span>Vite</span
+              ><span>localStorage</span
+              ><span class="hot">Web / Productivity</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              The JEE Mains journey, tracked.
+              <em
+                >Subject-wise study log, streaks, a 45/10 pomodoro loop and a
+                distraction-free focus mode — offline, mobile-first, no
+                backend.</em
+              >
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Study tracker</b></li>
+              <li><span>Status</span><b class="on">Complete</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Year</span><b>2026</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://github.com/vulgnox/personal-tracker"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <circle cx="42" cy="45" r="24" stroke-opacity="0.8" />
+                  <path
+                    d="M42 45V27M42 45l14 8"
+                    stroke-opacity="0.85"
+                    stroke-linecap="round"
+                  />
+                  <path
+                    d="M42 21v-6M79 45h-6M42 69v6M5 45h6"
+                    stroke-opacity="0.35"
+                  />
+                  <path d="M86 70h58" stroke-opacity="0.4" />
+                </g>
+                <circle
+                  cx="42"
+                  cy="45"
+                  r="19"
+                  class="pv-ring"
+                  stroke-opacity="0.5"
+                  stroke-dasharray="119"
+                  transform="rotate(-90 42 45)"
+                >
+                  <animate
+                    attributeName="stroke-dashoffset"
+                    values="119;30;119"
+                    dur="4s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <rect
+                    x="92"
+                    y="56"
+                    width="8"
+                    height="14"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="104"
+                    y="48"
+                    width="8"
+                    height="22"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="116"
+                    y="52"
+                    width="8"
+                    height="18"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="128"
+                    y="40"
+                    width="8"
+                    height="30"
+                    stroke-opacity="0.65"
+                  />
+                  <rect
+                    x="140"
+                    y="31"
+                    width="8"
+                    height="39"
+                    stroke-opacity="0.7"
+                  />
+                </g>
+                <g fill="currentColor" opacity="0.55">
+                  <circle cx="96" cy="51" r="1.5" />
+                  <circle cx="120" cy="47" r="1.5" />
+                  <circle cx="144" cy="36" r="1.5" />
+                </g>
+                <circle cx="42" cy="45" r="2.6" class="pv-a pv-pulse" />
+              </svg>
+              <figcaption>FIG. 07 — POMODORO RING + WEEK BARS</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              A mobile-first tracker for JEE Mains aspirants: log study hours
+              per subject — <b>Physics, Chemistry, Maths</b> — against a daily
+              goal, watch the streak count, keep going.
+            </p>
+            <h3>The pomodoro is the product</h3>
+            <p>
+              <b>45-minute focus blocks, 10-minute breaks</b>, an animated
+              circular countdown that switches phases by itself. Focus mode
+              strips the screen to the timer and your current task, rotates
+              JEE-specific motivational quotes, and warns before you navigate
+              away.
+            </p>
+            <h3>Guarded time</h3>
+            <p>
+              A screen-time controller tracks time spent in the app and enforces
+              a configurable daily limit. Notifications-API reminders — custom
+              label, time, day-of-week — plus a daily check-in nudge if no
+              session has been logged.
+            </p>
+            <h3>Everything local</h3>
+            <p>
+              One index.html holds the app — HTML, CSS, JS, no framework.
+              Chart.js draws the weekly bars; every byte lives in localStorage.
+              <em>Nothing is sent to any server.</em>
+            </p>
+            <blockquote class="cs-quote">
+              All data is stored locally in the browser. Nothing is sent to any
+              server.<cite>Data &amp; privacy — README</cite>
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Storage</dt>
+                <dd><b class="on">localStorage</b></dd>
+              </div>
+              <div>
+                <dt>Backend</dt>
+                <dd><b>none</b></dd>
+              </div>
+              <div>
+                <dt>Charts</dt>
+                <dd><b>Chart.js 4.4</b></dd>
+              </div>
+              <div>
+                <dt>Mode</dt>
+                <dd><b>pomodoro 45 / 10</b></dd>
+              </div>
+              <div>
+                <dt>Build</dt>
+                <dd><b>vanilla + Vite</b></dd>
+              </div>
+              <div>
+                <dt>Privacy</dt>
+                <dd><b>fully offline</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Log</h3>
+                <p>
+                  Subject-wise hours against a daily goal; a 7-day history and a
+                  streak counter keep the pressure honest.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Focus</h3>
+                <p>
+                  45/10 pomodoro with auto phase switching; focus mode hides
+                  everything but the timer and the task.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Guard</h3>
+                <p>
+                  Screen-time limit with warning alerts; reminders through the
+                  browser Notifications API.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Review</h3>
+                <p>
+                  Dashboard: today's hours, streak, weekly total, goal progress,
+                  per-subject bars, weekly Chart.js chart.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Ship</h3>
+                <p>
+                  Vite for dev and deploy — pnpm --filter @workspace/jee-tracker
+                  run dev.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">Single file</span>
+              <p>
+                The whole app — HTML, CSS, JS — lives in index.html. No
+                framework, no runtime build step.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Offline by design</span>
+              <p>
+                localStorage only: streaks, sessions, settings. Clear the
+                browser and it resets — by design.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Vite wrapper</span>
+              <p>
+                A minimal Vite entry point gives dev server and deployment
+                without touching the app itself.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="blood-and-coin.html">
+            <span class="cs-nav-idx">← PREVIOUS — 06</span>
+            <span class="cs-nav-name">Blood &amp; Coin</span>
+          </a>
+          <a href="psyche-analyze.html">
+            <span class="cs-nav-idx">NEXT — 01 →</span>
+            <span class="cs-nav-name">Psyche_analyze</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>

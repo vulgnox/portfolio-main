@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="How Psyche_analyze pairs a 70B conversational model with an 8B analyzer to type personalities from live transcripts — Flask, dual-model NIM, live on Render."
+    />
+    <meta name="author" content="Gaurav Singh Rawat" />
+    <meta name="theme-color" content="#0b0b0b" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Psyche_analyze — Case Study — NOX" />
+    <meta
+      property="og:description"
+      content="How Psyche_analyze pairs a 70B conversational model with an 8B analyzer to type personalities from live transcripts — Flask, dual-model NIM, live on Render."
+    />
+    <meta
+      property="og:url"
+      content="https://portfolio-nox07.vercel.app/work/psyche-analyze.html"
+    />
+    <meta
+      property="og:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Psyche_analyze — Case Study — NOX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Psyche_analyze — Case Study — NOX" />
+    <meta
+      name="twitter:description"
+      content="How Psyche_analyze pairs a 70B conversational model with an 8B analyzer to type personalities from live transcripts — Flask, dual-model NIM, live on Render."
+    />
+    <meta
+      name="twitter:image"
+      content="https://portfolio-nox07.vercel.app/og.png"
+    />
+    <link
+      rel="canonical"
+      href="https://portfolio-nox07.vercel.app/work/psyche-analyze.html"
+    />
+    <title>Psyche_analyze — Case Study — NOX</title>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "name": "Psyche_analyze — Case Study",
+        "headline": "Psyche_analyze",
+        "url": "https://portfolio-nox07.vercel.app/work/psyche-analyze.html",
+        "image": "https://portfolio-nox07.vercel.app/og.png",
+        "author": {
+          "@type": "Person",
+          "name": "Gaurav Singh Rawat",
+          "alternateName": ["NOX", "vulgnox"],
+          "url": "https://portfolio-nox07.vercel.app/",
+          "sameAs": ["https://github.com/vulgnox"]
+        },
+        "isPartOf": {
+          "@type": "WebSite",
+          "name": "NOX — Gaurav Singh Rawat",
+          "url": "https://portfolio-nox07.vercel.app/"
+        }
+      }
+    </script>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230b0b0b'/%3E%3Ccircle cx='32' cy='32' r='14' fill='%239e1b22'/%3E%3C/svg%3E"
+    />
+    <noscript
+      ><style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+        .menu-btn {
+          display: none !important;
+        }
+        .top-nav {
+          display: flex !important;
+          gap: 0.8rem;
+          font-size: 0.55rem;
+        }
+      </style></noscript
+    >
+    <link rel="stylesheet" href="case.css" />
+    <link rel="stylesheet" href="../fx.css" />
+    <script>
+      // apply saved theme before first paint — no dark flash for light-mode visitors.
+      // ?theme= wins over storage so the preference survives even when storage is
+      // partitioned (file viewers, sandboxed previews, file://).
+      try {
+        var q = new URLSearchParams(location.search).get("theme");
+        var t =
+          q === "light" || q === "dark" ? q : localStorage.getItem("nox-theme");
+        if (t === "light" || t === "dark") {
+          document.documentElement.setAttribute("data-theme", t);
+          localStorage.setItem("nox-theme", t);
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body data-case="1">
+    <!-- background stack: nature photos (CC0) + Faulty Terminal + veil -->
+    <div class="bg-stack" aria-hidden="true">
+      <div class="bg-photos">
+        <div class="bg-photo bg-ridge"></div>
+        <div class="bg-photo bg-forest"></div>
+        <div class="bg-photo bg-sky"></div>
+      </div>
+      <div class="ft-wrap">
+        <canvas class="ft-canvas" id="ftCanvas"></canvas>
+      </div>
+      <div class="bg-veil"></div>
+    </div>
+
+    <a class="skip" href="#index">Skip to content</a>
+    <div class="scroll-progress" id="progress" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="logo" href="../index.html#index" aria-label="NOX — home">
+        NOX<span class="dot" aria-hidden="true"></span><sup>®</sup>
+      </a>
+
+      <span class="top-status">
+        <span class="live" aria-hidden="true"></span>
+        SIGNAL <b>ONLINE</b> — <b data-clock>00:00:00 UTC</b>
+      </span>
+
+      <div class="top-right">
+        <nav class="top-nav" aria-label="Primary">
+          <a href="../index.html#work">Work</a>
+          <a href="../index.html#stack">Stack</a>
+          <a href="../index.html#signal">Signal</a>
+          <a href="../index.html#contact">Contact</a>
+        </nav>
+        <button
+          class="chrome-btn"
+          id="themeToggle"
+          type="button"
+          aria-label="Switch to light theme"
+        >
+          <span class="theme-label">LIGHT</span>
+        </button>
+        <button
+          class="chrome-btn"
+          id="soundBtn"
+          type="button"
+          aria-pressed="true"
+          aria-label="Mute sound effects"
+        >
+          <span class="sound-label">SND ON</span>
+        </button>
+        <button
+          class="chrome-btn menu-btn"
+          id="menuBtn"
+          type="button"
+          aria-expanded="false"
+          aria-controls="menuPanel"
+        >
+          MENU
+        </button>
+      </div>
+    </header>
+
+    <div class="menu-panel" id="menuPanel">
+      <a href="../index.html#work"><span>01</span>Work</a>
+      <a href="../index.html#stack"><span>02</span>Stack</a>
+      <a href="../index.html#signal"><span>03</span>Signal</a>
+      <a href="../index.html#contact"><span>04</span>Contact</a>
+      <div class="menu-meta">
+        NOX — GAURAV SINGH RAWAT<br />INDEPENDENT DEVELOPER — OPEN TO WORK
+      </div>
+    </div>
+
+    <div class="easter" id="easter" aria-hidden="true">
+      <div class="easter-inner">
+        <span class="easter-tag">NERV OS v2.0 — SEELE COMMITTEE</span>
+        <strong>INSTRUMENTALITY<br />INITIATED.</strong>
+        <span class="easter-tag"
+          >PROJECT EVA // STATUS: TANG — ESC TO ABORT</span
+        >
+      </div>
+    </div>
+
+    <main id="index">
+      <section class="hero wrap" aria-labelledby="csTitle">
+        <div class="hero-meta">
+          <span>CASE STUDY — <b>01</b> / 07</span>
+          <span>SELECTED WORK <b class="red">/</b> NOX</span>
+          <span><b data-clock>00:00:00 UTC</b></span>
+        </div>
+
+        <div class="cs-head">
+          <div class="reveal">
+            <div class="sec-kicker">
+              <span class="n">01</span
+              ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+                <path d="M0 6h10M15 6h21M15 1v10" /></svg
+              ><span>CASE STUDY 01 / 07</span>
+            </div>
+            <h1 class="cs-title" id="csTitle">
+              PSYCHE<br /><span class="ghost">ANALYZE</span>
+            </h1>
+            <div class="cs-tags">
+              <span>Flask</span><span>NVIDIA NIM</span><span>Groq</span
+              ><span>SQLite → Postgres</span
+              ><span class="hot">AI / Personality</span>
+            </div>
+          </div>
+
+          <div class="cs-side reveal">
+            <p class="cs-lede">
+              A personality engine for friend groups — profiles, head-to-head
+              compatibility and AI-written group dynamics.
+              <em>One system that talks and reads at the same time.</em>
+            </p>
+            <ul class="status">
+              <li><span>Project</span><b>Personality engine</b></li>
+              <li><span>Status</span><b class="on">Live on Render</b></li>
+              <li><span>Source</span><b>Public</b></li>
+              <li><span>Year</span><b>2025 → 2026</b></li>
+            </ul>
+            <div class="cs-actions">
+              <a
+                class="link-btn solid"
+                href="https://psyche-analyze-10sz.onrender.com/"
+                target="_blank"
+                rel="noopener"
+              >
+                Live site
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+              <a
+                class="link-btn"
+                href="https://github.com/vulgnox/Psyche_analyze"
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+              <a class="link-btn" href="../index.html#work">
+                All work
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M7 17L17 7M9 7h8v8"
+                    stroke="currentColor"
+                    stroke-width="1.6"
+                    fill="none"
+                  />
+                </svg>
+              </a>
+            </div>
+            <figure class="cs-art">
+              <svg viewBox="0 0 160 90">
+                <g fill="none" stroke="currentColor" stroke-width="1.25">
+                  <rect
+                    x="10"
+                    y="18"
+                    width="52"
+                    height="46"
+                    stroke-opacity="0.8"
+                  />
+                  <path
+                    d="M16 28h34M16 36h24M16 44h38M16 52h18M16 60h30"
+                    stroke-opacity="0.5"
+                  />
+                  <path d="M66 40h12m-4-5 5 5-5 5" stroke-opacity="0.7" />
+                  <rect
+                    x="84"
+                    y="24"
+                    width="24"
+                    height="15"
+                    stroke-opacity="0.8"
+                  />
+                  <rect
+                    x="84"
+                    y="44"
+                    width="24"
+                    height="15"
+                    stroke-opacity="0.8"
+                  />
+                  <path d="M84 31.5h24M84 51.5h24" stroke-opacity="0.3" />
+                  <path d="M112 33l14 7m-14 6 14-7" stroke-opacity="0.45" />
+                  <rect
+                    x="130"
+                    y="30"
+                    width="20"
+                    height="20"
+                    stroke-opacity="0.8"
+                  />
+                  <path
+                    d="M135 36h10M135 41h7M135 46h10"
+                    stroke-opacity="0.55"
+                  />
+                </g>
+                <g fill="currentColor" opacity="0.55">
+                  <circle cx="21" cy="28" r="1.5" />
+                  <circle cx="44" cy="36" r="1.5" />
+                  <circle cx="31" cy="60" r="1.5" />
+                </g>
+                <circle r="2.2" class="pv-a">
+                  <animateMotion
+                    dur="1.8s"
+                    repeatCount="indefinite"
+                    path="M74 40 H112"
+                  />
+                </circle>
+                <circle r="2.2" class="pv-a">
+                  <animateMotion
+                    dur="1.8s"
+                    begin="0.9s"
+                    repeatCount="indefinite"
+                    path="M112 38 L140 40"
+                  />
+                </circle>
+              </svg>
+              <figcaption>
+                FIG. 01 — DUAL-MODEL PIPELINE: TRANSCRIPT IN, VERDICT OUT
+              </figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+      <section class="section wrap" id="overview" aria-labelledby="ovTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">01</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>OVERVIEW</span>
+          </div>
+          <h2 class="sec-title" id="ovTitle">
+            THE<br /><span class="ghost">BRIEF</span>
+          </h2>
+        </div>
+        <div class="cs-cols">
+          <div class="cs-body reveal">
+            <p>
+              PSYCHE maps a friend group's personalities, scores compatibility
+              trait by trait, and writes the analysis nobody in the group wants
+              to write themselves. Add anyone with their MBTI type, A/T variant
+              and five-dimension trait scores — the app takes it from there.
+            </p>
+            <h3>Four surfaces</h3>
+            <p>
+              <b>Profile builder</b> for everyone in the group.
+              <b>Head-to-head compare</b> — compatibility per trait, plus AI
+              analysis in four parts: synergy, clash, dynamic, verdict.
+              <b>Group analysis</b> — a pairwise grid across everyone, then the
+              group dynamic written out. <b>Role suggestions</b> — pick a subset
+              and a context (startup, study group, project) and the model
+              assigns ideal roles.
+            </p>
+            <h3>Two models, one protocol</h3>
+            <p>
+              A <b>70B conversational model</b> conducts the typing session; an
+              <b>8B analyzer</b> reads the transcript across a four-phase
+              protocol and returns the verdict. NVIDIA NIM runs both heavy ends,
+              Groq handles the instant passes. One schema serves SQLite and
+              Postgres alike — swap <b>DATABASE_URL</b> and the schema creates
+              itself on boot.
+            </p>
+            <p>
+              Profiles are private by default; two users who connect by username
+              can see each other.
+              <em>Deployed from render.yaml as a Blueprint</em> — the repo's
+              /api/health reports which storage backend is live.
+            </p>
+            <blockquote class="cs-quote">
+              One model talks.<br />One model reads the transcript.<cite
+                >Dual-model protocol — 70B / 8B</cite
+              >
+            </blockquote>
+          </div>
+          <aside class="reveal" aria-label="Specifications">
+            <dl class="cs-spec">
+              <div>
+                <dt>Status</dt>
+                <dd><b class="on">Live</b></dd>
+              </div>
+              <div>
+                <dt>Stack</dt>
+                <dd><b>Flask · vanilla JS</b></dd>
+              </div>
+              <div>
+                <dt>Models</dt>
+                <dd><b>NIM 70B + 8B</b></dd>
+              </div>
+              <div>
+                <dt>Fast pass</dt>
+                <dd><b>Groq llama-3.1-8b</b></dd>
+              </div>
+              <div>
+                <dt>Data</dt>
+                <dd><b>SQLite → Postgres</b></dd>
+              </div>
+              <div>
+                <dt>Deploy</dt>
+                <dd><b>Render blueprint</b></dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section wrap" id="system" aria-labelledby="sysTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">02</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>SYSTEM</span>
+          </div>
+          <h2 class="sec-title" id="sysTitle">
+            HOW IT<br /><span class="ghost">WORKS</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ol class="cs-steps">
+            <li>
+              <div>
+                <h3>Capture</h3>
+                <p>
+                  MBTI type, A/T variant and five trait percentages — entered
+                  straight from the 16personalities result page.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Score</h3>
+                <p>
+                  Pairwise compatibility computed per trait — a grid for the
+                  whole group, never a single vague number.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Analyze</h3>
+                <p>
+                  The conversational model talks; the analyzer reads the
+                  transcript across four phases and returns synergy, clash,
+                  dynamic and verdict.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Assign</h3>
+                <p>
+                  Pick any subset plus a context — startup, study group, project
+                  — and the model proposes who does what.
+                </p>
+              </div>
+            </li>
+            <li>
+              <div>
+                <h3>Ship</h3>
+                <p>
+                  render.yaml deploys it free; DATABASE_URL turns Render's
+                  ephemeral disk into persistent Postgres.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section wrap" id="log" aria-labelledby="logTitle">
+        <div class="sec-head reveal">
+          <div class="sec-kicker">
+            <span class="n">03</span
+            ><svg class="kicker-mark" viewBox="0 0 36 12" aria-hidden="true">
+              <path d="M0 6h10M15 6h21M15 1v10" /></svg
+            ><span>BUILD LOG</span>
+          </div>
+          <h2 class="sec-title" id="logTitle">
+            THE<br /><span class="ghost">RECORD</span>
+          </h2>
+        </div>
+        <div class="cs-body reveal">
+          <ul class="cs-log">
+            <li>
+              <span class="log-when">Flask core</span>
+              <p>
+                Flask + vanilla JS front end, SQLite file, no frameworks — one
+                schema shared by both storage backends.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Dual-model split</span>
+              <p>
+                Conversational and analyzer keys separated: a 70B model
+                conducts, an 8B model reads. Two keys, one protocol.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Render blueprint</span>
+              <p>
+                render.yaml checked in — New → Blueprint and the service exists,
+                keys stay in the dashboard.
+              </p>
+            </li>
+            <li>
+              <span class="log-when">Six months live</span>
+              <p>
+                Running on Render's free tier since launch — spinning down after
+                idle minutes, waking on the first request, as free tiers do.
+              </p>
+            </li>
+          </ul>
+        </div>
+      </section>
+      <section class="wrap" aria-label="Case study navigation">
+        <div class="cs-nav">
+          <a href="personal-tracker.html">
+            <span class="cs-nav-idx">← PREVIOUS — 07</span>
+            <span class="cs-nav-name">personal-tracker</span>
+          </a>
+          <a href="eva-shell.html">
+            <span class="cs-nav-idx">NEXT — 02 →</span>
+            <span class="cs-nav-name">eva-shell</span>
+          </a>
+        </div>
+      </section>
+      <footer class="wrap">
+        <div class="foot-grid">
+          <span class="foot-brand">
+            <svg class="foot-mark" viewBox="0 0 17 23" aria-hidden="true">
+              <g fill="currentColor">
+                <circle cx="2" cy="2" r="1.2" />
+                <circle cx="14" cy="2" r="1.2" />
+                <circle cx="2" cy="5" r="1.2" />
+                <circle cx="5" cy="5" r="1.2" />
+                <circle cx="14" cy="5" r="1.2" />
+                <circle cx="2" cy="8" r="1.2" />
+                <circle cx="8" cy="8" r="1.2" fill="#e23a2e" />
+                <circle cx="14" cy="8" r="1.2" />
+                <circle cx="2" cy="11" r="1.2" />
+                <circle cx="11" cy="11" r="1.2" />
+                <circle cx="14" cy="11" r="1.2" />
+                <circle cx="2" cy="14" r="1.2" />
+                <circle cx="14" cy="14" r="1.2" />
+                <circle cx="2" cy="17" r="1.2" />
+                <circle cx="14" cy="17" r="1.2" />
+                <circle cx="2" cy="20" r="1.2" />
+                <circle cx="14" cy="20" r="1.2" />
+              </g>
+            </svg>
+            © <span data-year>2026</span> NOX — GAURAV SINGH RAWAT
+          </span>
+          <span
+            >BUILT IN THE DARK <span class="foot-dot">●</span>
+            <b data-clock>00:00:00 UTC</b></span
+          >
+          <a href="#index">BACK TO TOP ↑</a>
+        </div>
+      </footer>
+    </main>
+
+    <script src="case.js"></script>
+    <script src="../faulty-terminal.js"></script>
+    <script src="../fx.js"></script>
+  </body>
+</html>
